@@ -128,8 +128,8 @@ MongoDB语句可以现在pycharm中编写，然后复制到CMD窗口中
 - 方法pretty()： 将结果格式化，输出结果更加美观，符合编码规范
 	db.集合名称.find({条件⽂档}).pretty()
 
-4.1 条件运算符
-    等于： 默认是等于判断， 没有运算符
+## 4.1 条件运算符
+-   等于： 默认是等于判断， 没有运算符
     ⼩于：$lt （less than）
     ⼩于等于：$lte （less than equal）
     ⼤于：$gt （greater than）
@@ -137,8 +137,8 @@ MongoDB语句可以现在pycharm中编写，然后复制到CMD窗口中
     不等于：$ne
     db.stu.find({age:{$gte:18}})
 
-4.2 比较运算符
-    等于： 默认是等于判断， 没有运算符
+## 4.2 比较运算符
+-   等于： 默认是等于判断， 没有运算符
     ⼩于：$lt （less than）
     ⼩于等于：$lte （less than equal）
     ⼤于：$gt （greater than）
@@ -146,7 +146,7 @@ MongoDB语句可以现在pycharm中编写，然后复制到CMD窗口中
     不等于：$ne
     db.stu.find({age:{$gte:18}})
     
-4.3 逻辑运算符
+## 4.3 逻辑运算符
 - and：在json中写多个条件即可
     查询年龄⼤于或等于18， 并且性别为true的学⽣
     db.stu.find({age:{$gte:18},gender:true})
@@ -161,13 +161,13 @@ MongoDB语句可以现在pycharm中编写，然后复制到CMD窗口中
 查询年龄为18、 28的学⽣
 db.stu.find({age:{$in:[18,28]}})
 
-4.4 正则表达式
-    使⽤//或$regex编写正则表达式
+## 4.4 正则表达式
+-   使⽤//或$regex编写正则表达式
     查询姓⻩的学⽣
     db.stu.find({name:/^⻩/})
     db.stu.find({name:{$regex:'^⻩'}})
 
-4.5 limit和skip
+## 4.5 limit和skip
 - ⽅法limit()： ⽤于读取指定数量的⽂档
     db.集合名称.find().limit(NUMBER)
     查询2条学⽣信息
@@ -184,8 +184,8 @@ db.stu.find({age:{$in:[18,28]}})
     
 - 主要用在翻页
     
-4.6 投影
-    在查询到的返回结果中， 只选择必要的字段
+## 4.6 投影
+-   在查询到的返回结果中， 只选择必要的字段
     db.集合名称.find({},{字段名称:1,...})
     参数为字段与值， 值为1表示显示， 不显示该字段不写
     特殊： 对于_id列默认是显示的， 如果不显示需要明确设置为0
@@ -194,8 +194,8 @@ db.stu.find({age:{$in:[18,28]}})
     年龄大于5的，只显示name字段
     db.test1000.find({age:{$gt:5}},{_id:0,name:1})
 
-4.7 排序
-    ⽅法sort()， ⽤于对	集进⾏排序
+## 4.7 排序
+-   ⽅法sort()， ⽤于对	集进⾏排序
     db.集合名称.find().sort({字段:1,...})
     参数1为升序排列
     参数-1为降序排列
@@ -214,7 +214,7 @@ db.stu.find({age:{$in:[18,28]}})
     db.stu.find({gender:true}).count()
     db.stu.count({age:{$gt:20},gender:true})
 
-4.9 消除重复
+## 4.9 消除重复
 - ⽅法distinct()对数据进⾏去重
     db.集合名称.distinct('去重字段',{条件})
     例如：
@@ -223,7 +223,7 @@ db.stu.find({age:{$in:[18,28]}})
     筛选出不重复的名字
     db.test1000.distinct("name",{})
     
-4.10 聚合aggregate
+## 4.10 聚合aggregate
 - 聚合(aggregate)是基于数据处理的聚合管道，每个文档通过一个由多个阶段（stage）组成的管道，
 - 可以对每个阶段的管道进行分组、过滤等功能，然后经过一系列的处理，输出相应的结果。 
 - db.集合名称.aggregate({管道:{表达式}})
