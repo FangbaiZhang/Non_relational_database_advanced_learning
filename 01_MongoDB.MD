@@ -70,10 +70,6 @@ MongoDB教程：
 - 删除当前的数据库：db.dropDatabase()
 
 # 3. 集合文档
-注意：
-MongoDB语句可以现在pycharm中编写，然后复制到CMD窗口中
-我的CMD粘贴后，有时候复制不进去
-
 
 - show collections 显示当前数据库下的集合
 
@@ -89,8 +85,6 @@ MongoDB语句可以现在pycharm中编写，然后复制到CMD窗口中
     插⼊⽂档时， 如果不指定_id参数， MongoDB会为⽂档分配⼀个唯⼀的ObjectId
     db.test1000.find() 查看该集合下的所有文档，可以显示出_id
     注意：如果插入文档时，指定_id参数，数据中本来有该id，则会出现错误，可以使用save或者update
-
-
 
 - 保存save
     db.集合名称.save(document)
@@ -119,8 +113,29 @@ MongoDB语句可以现在pycharm中编写，然后复制到CMD窗口中
     
     将name叫xiaohong的删除
     db.test1000.remove({name:"小红"},{justOne:false})
+
+- 删除集合
+    db.stu.remove({},{justOne:false})
     
-4. 数据查询
+# 4. 数据查询
+
+数据来源查看：
+    > show dbs
+    admin         0.000GB
+    config        0.000GB
+    local         0.000GB
+    papers        0.000GB
+    pythonSpider  0.000GB
+    test          0.000GB
+    yunqi         0.000GB
+    > use test
+    switched to db test
+    > show collections
+    dv3
+    stu
+    test1000
+    >
+
 - 方法find()： 查询
 	db.集合名称.find({条件⽂档})
 - 方法findOne()：查询，只返回第⼀个
@@ -222,12 +237,31 @@ db.stu.find({age:{$in:[18,28]}})
     db.stu.distinct('hometown',{age:{$gt:18}})  
     筛选出不重复的名字
     db.test1000.distinct("name",{})
-    
-## 4.10 聚合aggregate
+
+
+# 5 聚合分组统计(管道)   
+## 5.1 聚合aggregate
 - 聚合(aggregate)是基于数据处理的聚合管道，每个文档通过一个由多个阶段（stage）组成的管道，
 - 可以对每个阶段的管道进行分组、过滤等功能，然后经过一系列的处理，输出相应的结果。 
 - db.集合名称.aggregate({管道:{表达式}})
 
+- 先传入数据到stu(学生)集合中
+db.stu.insert({name:"郭靖", hometown:"蒙古", age:20, gender:true})
+db.stu.insert({name:"黄蓉", hometown:"桃花岛", age:18, gender:false})
+db.stu.insert({name:"华筝", hometown:"蒙古", age:18, gender:false})
+db.stu.insert({name:"黄药师", hometown:"桃花岛", age:40, gender:true})
+db.stu.insert({name:"段誉", hometown:"大理", age:16, gender:true})
+db.stu.insert({name:"段王爷", hometown:"大理", age:45, gender:true})
+db.stu.insert({name:"洪七公", hometown:"华山", age:18, gender:true})
+
+注意：
+MongoDB语句可以现在pycharm中编写，然后复制到CMD窗口中
+现在pycharm中使用ctrl+c复制命令，然后CMD窗口点击鼠标右键，就自动粘贴了
+可以一次复制多行，有时候会出现粘贴不上去的情况
+
+
+- db.集合名称.aggregate({管道:{表达式}})
+- 管道和表达式都可以有多个
 - 管道：
     在mongodb中，⽂档处理完毕后， 通过管道进⾏下⼀次处理
     常用管道如下：
@@ -243,10 +277,141 @@ db.stu.find({age:{$in:[18,28]}})
     处理输⼊⽂档并输出
     语法：表达式:'$列名'
     常⽤表达式:
-    $sum： 计算总和， $sum:1 表示以⼀倍计数
+    $sum： 计算总和， 
+    $sum:1 表示以⼀倍计数
     $avg： 计算平均值
     $min： 获取最⼩值
     $max： 获取最⼤值
     $push： 在结果⽂档中插⼊值到⼀个数组中
     $first： 根据资源⽂档的排序获取第⼀个⽂档数据
     $last： 根据资源⽂档的排序获取最后⼀个⽂档数据        
+
+## 5.2 $group分组统计
+
+- $group注意点
+    - $group对应字典中有几个键，结果中对应就有几个值
+    - 分组依据必须放在_id的值中
+    - 取不同的字段的时候需要使用$,比如$country，$age
+    - 取字典嵌套的字典中的值的时候$,$_id.country
+    - 能够同时按照多个组进行分组
+    - 管道依次按顺序处理，常用处理顺序过滤-分组-重整
+
+### 实例
+- 语法格式：
+    先写分组,必须使用_id作为键，然后里面的_id代表以哪个字段进行分组
+    后面的字段是分组里面进行统计，求和，求平均值，最大值等等
+    分组里面的键都是自己指定的，值是集合里面有的字段，前面都需要$符号
+
+- 统计整个文档
+    - _id为null
+    - 整个文档求和求平均值
+    db.stu.aggregate(
+        {$group:{_id:null, count:{$sum:1}, mean_age:{$avg:"$age"}}}
+        )
+
+- 指定条件进行分组，然后统计
+    - 按性别分组（注意$符号不能遗漏，还要注意}不要遗漏）
+    db.stu.aggregate(
+    {$group:{_id:"$gender"}}
+    )
+    - 按性别分组，然后统计每个性别的和，同时求最小值
+    db.stu.aggregate(
+    {$group:{_id:"$gender", count:{$sum:1}, min_age:{$min:"$age"}}}
+    )
+    
+    - 按家乡进行分组,统计个数，求平均年龄
+    db.stu.aggregate(
+    {$group:{_id:"$hometown", count:{$sum:1}, mean_age:{$avg:"$age"}}}
+    )
+    
+## 5.3 $project重构
+- 修改文档结构，修改输出的格式
+    _id字段的键使用gender进行替换
+    _id:0 不显示_id字段
+    count:1 显示count字段
+    avg_age:1 显示avg_age字段
+    
+    db.stu.aggregate(
+        {$group:{_id:"$gender", count:{$sum:1}, avg_age:{$avg:"$age"}}},
+        {$project:{_id:0, gender:"$_id", count:1, avg_age:1}}
+        )
+
+## 5.4 $match过滤
+- 选择年龄大于20的学生，观察男性和女性的人数
+      db.stu.aggregate(
+        {$match:{age:{$gt:16}}},
+        {$group:{_id:"$gender", count:{$sum:1}}},
+        {$project:{_id:0, gender:"$_id", count:1}}
+        )
+      
+- 选择年龄大于20或者家乡是蒙古或大理的学生，观察男性和女性的人数
+      db.stu.aggregate(
+        {$match:{$or:[{age:{$gt:16}},{hometown:{$in:["蒙古", "大理"]}}]}},
+        {$group:{_id:"$gender", count:{$sum:1}}},
+        {$project:{_id:0, gender:"$_id", count:1}}
+        )   
+
+- 综合练习：       
+- 统计出每个country/province下的userid的数量（同一个userid只统计一次）        
+db.dv3.insert({"country" : "china", "province" : "sh", "userid" : "a" } ) 
+db.dv3.insert({  "country" : "china", "province" : "sh", "userid" : "b" } )
+db.dv3.insert({  "country" : "china", "province" : "sh", "userid" : "a" }  )
+db.dv3.insert({  "country" : "china", "province" : "sh", "userid" : "c" } )
+db.dv3.insert({  "country" : "uk", "province" : "bj", "userid" : "da" } )
+db.dv3.insert({  "country" : "china", "province" : "bj", "userid" : "fa" }  )
+
+- 所有字段进行分组，可以达到去重的效果，上面第一行于第三行数据相同
+db.dv3.aggregate(
+    {$group:{_id:{country:"$country", province:"$province", userid:"$userid"}}}
+)
+
+- 上面去重后的结果继续按照国家和省份进行分组,然后统计每个分组的和
+- 第一次分组后第二次分组，第二次分组使用第一次的分组的_id
+- 分组后的结果重整结构
+db.dv3.aggregate(
+    {$group:{_id:{country:"$country", province:"$province", userid:"$userid"}}},
+    {$group:{_id:{country:"$_id.country", province:"$_id.province"}, count:{$sum:1}}},
+    {$project:{country:"$_id.country", province:"$_id.province", count:1, _id:0}}
+)
+ 
+
+## 5.5 sort排序，skip，limit
+- 学生按年龄升序排列
+    db.stu.aggregate(
+        {$sort:{age:1}}
+    )
+
+- 学生按性别分组，统计个数，然后按个数降序排列
+    db.stu.aggregate(
+        {$group:{_id:"$gender", count:{$sum:1}}},
+        {$sort:{count:-1}}
+    )
+    
+- skip和limit
+    - 先跳过两个，然后选定两个
+    db.stu.aggregate({$skip:2},{$limit:2})
+
+## 5.6 unwind拆分
+- 将⽂档中的某⼀个数组类型字段拆分成多条， 每条包含数组中的⼀个值
+- 语法：db.集合名称.aggregate({$unwind:'$字段名称'})
+
+    db.t2.insert({_id:1,item:'t-shirt',size:['S','M','L']})
+    db.t2.aggregate({$unwind:'$size'})
+    结果如下：
+    { "_id" : 1, "item" : "t-shirt", "size" : "S" }
+    { "_id" : 1, "item" : "t-shirt", "size" : "M" }
+    { "_id" : 1, "item" : "t-shirt", "size" : "L" }
+
+- 字段unwind拆分后，统计长度
+    - 插入数据
+    db.t3.insert({username:"Alex", tags:["C+", "Java", "Python"]})
+    - 拆分tags，统计拆分后的文档个数
+    db.t3.aggregate({$match:{username:"Alex"}}, {$unwind:"$tags"}, {$group:{_id:null, sum:{$sum:1}}})
+    - 先匹配到用户，然后对tags进行拆分，然后按null(不指定字段，所有文档分组)分组，然后统计分组的个数
+    
+# 6 创建索引
+- 先插入数据,使用js语法
+    for(i=0;i<100000;i++){db.t12.insert({name:"test"+i,age:i})}
+    数据较多，插入较慢，一分钟左右
+    查看数据条数
+    db.t12.find().count()
