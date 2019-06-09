@@ -10,7 +10,8 @@ MongoDB教程：
 
 - 第一部分：MongoDB安装
 - 第二部分：MongoDB常用操作
-- 第三部分：
+- 第三部分：MongoDB高级操作
+- 第四部分：MongoDB与Python交互
 
 
 
@@ -114,7 +115,7 @@ MongoDB教程：
     将name叫xiaohong的删除
     db.test1000.remove({name:"小红"},{justOne:false})
 
-- 删除集合
+- 删除集合，条件为空，删除全部
     db.stu.remove({},{justOne:false})
     
 # 4. 数据查询
@@ -238,6 +239,8 @@ db.stu.find({age:{$in:[18,28]}})
     筛选出不重复的名字
     db.test1000.distinct("name",{})
 
+
+# 第三部分：MongoDB高级操作
 
 # 5 聚合分组统计(管道)   
 ## 5.1 聚合aggregate
@@ -411,7 +414,154 @@ db.dv3.aggregate(
     
 # 6 创建索引
 - 先插入数据,使用js语法
-    for(i=0;i<100000;i++){db.t12.insert({name:"test"+i,age:i})}
+    for(i=0;i<10000;i++){db.t12.insert({name:"test"+i,age:i})}
     数据较多，插入较慢，一分钟左右
     查看数据条数
     db.t12.find().count()
+    
+- 查找数据，并查看耗费时间
+    > db.t12.find().count()
+    100000
+    > db.t12.find({name:"test30000"})
+    { "_id" : ObjectId("5cf8d888e1d09b780e764cd9"), "name" : "test30000", "age" : 30000 }
+    > db.t12.find({age:30000}).explain('executionStats')
+    {.......
+            "executionStats" : {
+                    "executionSuccess" : true,
+                    "nReturned" : 1,
+                    "executionTimeMillis" : 82,
+                    "totalKeysExamined" : 0,
+                    "totalDocsExamined" : 100000,
+    ........
+    }
+    上面花费时间82ms
+    
+- 建立索引之后对比：
+    语法：db.集合.ensureIndex({要建立索引的字段:1})，1表示升序， -1表示降序
+    具体操作：
+    db.t12.ensureIndex({name:1})
+    {
+            "createdCollectionAutomatically" : false,
+            "numIndexesBefore" : 1,
+            "numIndexesAfter" : 2,
+            "ok" : 1
+    }
+    db.t12.find({name:"test30000"}).explain('executionStats')
+    "inputStage" : {
+                                "stage" : "IXSCAN",
+                                "nReturned" : 1,
+                                "executionTimeMillisEstimate" : 0,
+                                "works" : 2,
+    建立索引后查找时间0ms
+    
+- 查看索引
+    db.t12.getIndexes()
+    [
+            {
+                    "v" : 2,
+                    "key" : {
+                            "_id" : 1
+                    },
+                    "name" : "_id_",
+                    "ns" : "test.t12"
+            },
+            {
+                    "v" : 2,
+                    "key" : {
+                            "name" : 1
+                    },
+                    "name" : "name_1",
+                    "ns" : "test.t12"
+            }
+    ]
+    上面结果中有两个字典，key就是创建索引的字段
+    数据库默认都会以_id字段创建默认索引，默认也是升序
+    "name" : 1 就是我们刚刚给name字段创建的索引，创建索引后查询速度明显变快
+
+- 删除索引：
+     db.t12.dropIndex('索引名称')
+     db.t12.dropIndex({name:1})
+     { "nIndexesWas" : 2, "ok" : 1 }
+     删除之后就只有一个默认索引了
+     
+- 在默认情况下创建的索引均不是唯一索引。
+    创建唯一索引（可以对数据进行去重，name字段相同的但是只会创建一个索引，自动排除重复的）:
+         db.t12.ensureIndex({"name":1},{"unique":true})
+    创建唯一索引并消除重复：
+         db.t12.ensureIndex({"name":1},{"unique":true,"dropDups":true})  
+    建立联合索引(什么时候需要联合索引)：
+         db.t12.ensureIndex({name:1,age:1})
+         
+- 爬虫数据去重
+    - 使用数据库建立的关键字段（一个或者多个）的唯一索引进行去重
+    
+    - URL地址对应数据不会变的情况，URL地址能够唯一判别一条数据的
+        - 使用场景：
+        URL地址持久化存储在redis集合中，具体步骤：
+        拿到URL地址，判断url是否在redis的url集合中
+        存在：说明url已经请求过，不再请求
+        不存在：url没请求过，请求，同时存储url到该集合中
+        - 布隆过滤器
+            位操作，将url地址通过算法转换为对应的位置
+    
+    - 根据数据本身进行去重
+        - 选择特定的字段，使用加密算法（md5,sha1）将字段进行加密，生成字符串
+        - 后续新来一条数据，同样的方法进行加密，如果得到的字符串在redis集合中
+        - 说明存在，对数据更新，如果不存在，则直接插入该数据
+
+# 7 数据库备份与恢复                             
+- 启动本地的mongodb数据库，不需要使用mongo连接数据库
+- 直接启动后使用备份和恢复命令即可对mongodb数据库中所有的dbs进行备份操作
+- 要想将其他数据恢复早mongodb中，也是在该级操作
+
+- 数据备份：
+    参考教程：http://www.baidu.com/link?url=I_GAWYpj6q4l_P4fmTfwd8CxCokr0sFvaZB7yhXT4vG-9BEx1pyXus1DocoxqogW7jUZ_7XbMunaCTlGDIk2S5gSQid5YE1Kd-WTR_YEvdq
+    备份的语法：
+    mongodump -h dbhost -d dbname -o dbdirectory
+    -h： 服务器地址， 也可以指定端⼝号
+    -d： 需要备份的数据库名称
+    -o： 备份的数据存放位置， 此⽬录中存放着备份出来的数据
+    -使用mongo连接数据库，可以看到该数据库的地址和端口号
+    
+    C:\WINDOWS\system32>net start mongodb
+    请求的服务已经启动。
+    
+    请键入 NET HELPMSG 2182 以获得更多的帮助。    
+    C:\WINDOWS\system32>mongo
+    MongoDB shell version v4.0.7
+    connecting to: mongodb://127.0.0.1:27017/?gssapiServiceName=mongodb
+    Implicit session: session { "id" : UUID("dd815f12-50ec-499d-a162-b5ee7f3003d5") }
+    MongoDB server version: 4.0.7
+    .....
+    > exit
+    bye
+    
+    备份test数据库到H盘的文件夹中：
+    mongodump -h 127.0.0.1:27017 -d test -o H:\mongodb\mongobeifen
+    
+    C:\WINDOWS\system32>mongodump -h 127.0.0.1:27017 -d test -o H:\mongodb\mongobeifen
+    2019-06-09T13:38:50.248+0800    writing test.t12 to
+    2019-06-09T13:38:50.338+0800    writing test.stu to
+    2019-06-09T13:38:50.339+0800    writing test.dv3 to
+    2019-06-09T13:38:50.339+0800    writing test.test1000 to
+    2019-06-09T13:38:50.343+0800    done dumping test.stu (7 documents)
+    2019-06-09T13:38:50.344+0800    writing test.t3 to
+    2019-06-09T13:38:50.347+0800    done dumping test.dv3 (6 documents)
+    2019-06-09T13:38:50.348+0800    done dumping test.test1000 (4 documents)
+    2019-06-09T13:38:50.349+0800    done dumping test.t3 (1 document)
+    2019-06-09T13:38:50.916+0800    done dumping test.t12 (100000 documents)
+    
+- 数据恢复
+    恢复语法：
+         mongorestore -h dbhost -d dbname --dir dbdirectory
+    -h： 服务器地址
+    -d： 需要恢复的数据库实例
+    --dir： 备份数据所在位置
+    
+    mongorestore -h 127.0.0.1:27017 -d douban --dir H:\mongodb\mongobeifen\douban
+
+
+# 第四部分：MongoDB与Python交互
+
+# 8 Python操作MongoDB
+-
