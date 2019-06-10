@@ -36,7 +36,7 @@ MongoDB教程：
     Python爬虫开发与项目实战8.3.1节内容
     
 # 2. MongoDB副本集
-
+- 查看Python爬虫开发与项目实战笔记及截图
 
 # 3. MongoDB基本概念
 - 文档document
@@ -55,6 +55,29 @@ MongoDB教程：
     MongoDB单个实例可以容纳多个独立的数据库，不同的数据库又放置在不同的文件中
 
 - 文档集合数据库参考003/004图片
+
+4. MongoDB优势及应用
+MongoDB 是由C++语言编写的，是一个基于分布式文件存储的开源数据库系统。
+在高负载的情况下，添加更多的节点，可以保证服务器性能。
+MongoDB 旨在为WEB应用提供可扩展的高性能数据存储解决方案。
+
+MongoDB 将数据存储为一个文档，数据结构由键值(key=>value)对组成。
+MongoDB 文档类似于 JSON 对象。字段值可以包含其他文档，数组及文档数组。
+
+MongoDB 应用案例
+下面列举一些公司MongoDB的实际应用：
+    Craiglist上使用MongoDB的存档数十亿条记录。
+    FourSquare，基于位置的社交网站，在Amazon EC2的服务器上使用MongoDB分享数据。
+    Shutterfly，以互联网为基础的社会和个人出版服务，使用MongoDB的各种持久性数据存储的要求。
+    bit.ly, 一个基于Web的网址缩短服务，使用MongoDB的存储自己的数据。
+    spike.com，一个MTV网络的联营公司， spike.com使用MongoDB的。
+    Intuit公司，一个为小企业和个人的软件和服务提供商，为小型企业使用MongoDB的跟踪用户的数据。
+    sourceforge.net，资源网站查找，创建和发布开源软件免费，使用MongoDB的后端存储。
+    etsy.com ，一个购买和出售手工制作物品网站，使用MongoDB。
+    纽约时报，领先的在线新闻门户网站之一，使用MongoDB。
+    CERN，著名的粒子物理研究所，欧洲核子研究中心大型强子对撞机的数据使用MongoDB。
+
+
 
 # 第二部分：MongoDB常用操作
 
@@ -564,4 +587,4 @@ db.dv3.aggregate(
 # 第四部分：MongoDB与Python交互
 
 # 8 Python操作MongoDB
--
+- 参考案例005/006/007
