@@ -8,11 +8,23 @@ Redis教程：
 - 菜鸟网：https://www.runoob.com/redis/redis-tutorial.html
 - Redis中文网：http://redis.cn/
 
+Redis命令：
+- Redis官网全部命令：
+    https://redis.io/commands
+- Redis命令参考中文网：
+    http://doc.redisfans.com/
+
+- Redis使用参考：
+    Python爬虫开发与项目实战PDF文件中的第16章 分布式爬虫与Scrapy
+    Python爬虫开发与项目实战项目文件的ch16中的Python交互实例
+    ch12中的sht爬虫项目采用的就是:ShtSpider(RedisSpider)(使用的redis爬取去重)
+    ch17中的yunqshuyuan项目去重方式也是采用的redis去重
+
 
 - 第一部分：Redis简介及安装
-- 第二部分：MongoDB常用操作
-- 第三部分：MongoDB高级操作
-- 第四部分：MongoDB与Python交互
+- 第二部分：Redis数据操作
+- 第三部分：Redis与Python交互
+- 第四部分：
 
 
 
@@ -83,3 +95,388 @@ https://blog.csdn.net/ljphilp/article/details/52934933
 - Redis支持五种数据类型：
     string（字符串），hash（哈希），list（列表），set（集合）及zset(sorted set：有序集合)。
 
+# 5. Redis默认数据库
+Redis是一个字典结构的存储服务器，而实际上一个Redis实例提供了多个用来存储数据的字典，
+客户端可以指定将数据存储在哪个字典中。这与我们熟知的在一个关系数据库实例中可以创建多个数据库类似，
+所以可以将其中的每个字典都理解成一个独立的数据库。
+
+每个数据库对外都是一个从0开始的递增数字命名，Redis默认支持16个数据库（可以通过配置文件支持更多，无上限），
+可以通过配置databases来修改这一数字。客户端与Redis建立连接后会自动选择0号数据库，
+不过可以随时使用SELECT命令更换数据库，如要选择1号数据库：select 1
+
+查看数据库所有的key: keys *
+
+
+# 第二部分：Redis数据操作
+
+- Redis官网全部命令：
+    https://redis.io/commands
+- Redis命令参考中文网：
+    http://doc.redisfans.com/
+- 下面主要介绍一些常用数据操作命令
+
+
+# 6. 键命令
+- 查看所有键
+    keys *
+
+- 查看名字中包含a的键
+    127.0.0.1:6379> keys a*
+    1) "a2"
+    2) "a1"
+    3) "a3"
+    
+- 判断键是否存在，如果存在返回1，不存在返回0
+    exists key1
+    判断键a1是否存在
+    127.0.0.1:6379> exists a1
+    (integer) 1
+    127.0.0.1:6379> exists a1 a2
+    (integer) 2
+    127.0.0.1:6379>
+    
+- 查看键对应的value的类型
+    type key
+    查看键a1的值类型，为redis⽀持的五种类型中的⼀种
+    127.0.0.1:6379> type a1
+    string
+
+- 删除键及对应的值
+    del key1 key2 ...
+    删除键a2、a3
+    127.0.0.1:6379> del a2 a3
+    (integer) 2
+    127.0.0.1:6379> mget a1 a2 a3
+    1) "pythonhaha"
+    2) (nil)
+    3) (nil)
+    
+- 设置过期时间，以秒为单位,如果没有指定过期时间则⼀直存在，直到使⽤DEL移除
+    expire key seconds
+    设置键'a1'的过期时间为20秒
+    查看有效时间，以秒为单位           
+    ttl key
+    
+    127.0.0.1:6379> set a1 python
+    OK
+    127.0.0.1:6379> get a1
+    "python"
+    127.0.0.1:6379> expire a1 20
+    (integer) 1
+    127.0.0.1:6379> get a1
+    "python"
+    127.0.0.1:6379> ttl a1
+    (integer) 13
+    127.0.0.1:6379> ttl a1
+    (integer) 10
+    127.0.0.1:6379> ttl a1
+    (integer) 0
+    127.0.0.1:6379> ttl a1
+    (integer) -2
+    127.0.0.1:6379> get a1
+    (nil)
+
+- 更多键命令参考：https://www.runoob.com/redis/redis-keys.html
+
+
+# 7. string字符串
+
+- 字符串类型是Redis中最为基础的数据存储类型，它在Redis中是二进制安全的，这便意味着该类型可以接受任何格式的数据，
+- 如JPEG图像数据或Json对象描述信息等。在Redis中字符串类型的Value最多可以容纳的数据长度是512M。
+
+- 如果设置的键不存在则为添加，如果设置的键已经存在则修改
+
+- 设置单个键值
+    set key value
+    例1：
+    127.0.0.1:6379> set name itcast
+    OK
+    127.0.0.1:6379> get name
+    "itcast"
+    
+- 设置键值及过期时间，以秒为单位
+    setex key seconds value
+    例2：设置键为aa值为aa过期时间为3秒的数据
+    127.0.0.1:6379> setex aa 3 aa
+    OK
+    127.0.0.1:6379> get aa
+    (nil)
+    
+- 设置多个键值
+    mset key1 value1 key2 value2 ...
+    例3：设置键为'a1'值为'python'、键为'a2'值为'java'、键为'a3'值为'c'
+    127.0.0.1:6379> mset a1 python a2 java a3 c
+    OK
+    127.0.0.1:6379> get a1
+    "python"
+    127.0.0.1:6379> get a2
+    "java"
+    127.0.0.1:6379> get a3
+    "c"
+    
+- 追加值,直接拼接在原字符串后面
+    append key value
+    例4：向键为a1中追加值' haha'
+    127.0.0.1:6379> append a1 haha
+    (integer) 10
+    127.0.0.1:6379> get a1
+    "pythonhaha"
+    
+- 获取：根据键获取值，如果不存在此键则返回nil
+    get key
+    根据多个键获取多个值
+    mget key1 key2 ...
+    
+    127.0.0.1:6379> mget a1 a2 a3
+    1) "pythonhaha"
+    2) "java"
+    3) "c"
+
+- 更多字符串命令参考：https://www.runoob.com/redis/redis-strings.html
+
+
+# 8. hash
+- Redis hash 是一个string类型的field和value的映射表，hash特别适合用于存储对象。
+    Redis 中每个 hash 可以存储 232 - 1 键值对（40多亿）。
+    hash⽤于存储对象(key)，对象的结构为属性(field)、值(value)
+    值的类型为string 
+
+- 设置获取单个属性
+    hset key field value
+    127.0.0.1:6379> hset user name felix
+    (integer) 1
+    127.0.0.1:6379> hget user name
+    "felix"
+
+- 设置获取多个属性
+    hmset key field1 value1 field2 value2 ...
+    设置键u2的属性name为xiaohong、属性age为11
+    127.0.0.1:6379> hmset u2 name xiaohong age 11
+    OK
+    127.0.0.1:6379> hmget u2 name age
+    1) "xiaohong"
+    2) "11"
+
+- 获取所有属性的值
+    hvals key
+    获取键'u2'所有属性的值
+    127.0.0.1:6379> hvals u2
+    1) "xiaohong"
+    2) "11"
+    
+- 删除整个hash键及值，使⽤del命令
+    删除属性，属性对应的值会被⼀起删除
+    hdel key field1 field2 ...
+    删除键'u2'的属性'age'
+    127.0.0.1:6379> hdel u2 age
+    (integer) 1
+    127.0.0.1:6379> hvals u2
+    1) "xiaohong"
+    
+- 更多哈希命令参考：https://www.runoob.com/redis/redis-hashes.html
+
+# 9. list
+- Redis列表是简单的字符串列表，按照插入顺序排序。
+    你可以添加一个元素到列表的头部（左边）或者尾部（右边）
+    一个列表最多可以包含 232 - 1 个元素 (4294967295, 每个列表超过40亿个元素)。
+    列表的元素类型为string
+    按照插⼊顺序排序
+
+- 在左侧插⼊取出数据
+    lpush key value1 value2 ...
+    从键为'a1'的列表左侧分别加⼊数据a 、 b 、c
+    127.0.0.1:6379> lpush a1 a b c
+    (integer) 3
+    127.0.0.1:6379> lrange a1 0 10
+    1) "c"
+    2) "b"
+    3) "a"
+
+- 在右侧插⼊数据
+    rpush key value1 value2 ...
+    从键为'a1'的列表右侧加⼊数据0 1 2
+    127.0.0.1:6379> rpush a1 0 1 2
+    (integer) 6
+    127.0.0.1:6379> lrange a1 0 5
+    1) "c"
+    2) "b"
+    3) "a"
+    4) "0"
+    5) "1"
+    6) "2"
+    
+
+- 在指定元素的前或后插⼊新元素
+    linsert key before或after 现有元素 新元素        
+    在键为'a1'的列表中元素'b'前加⼊'3'
+    127.0.0.1:6379> linsert a1 before b 3
+    (integer) 7
+    127.0.0.1:6379> lrange a1 0 6
+    1) "c"
+    2) "3"
+    3) "b"
+    4) "a"
+    5) "0"
+    6) "1"
+    7) "2"
+    
+- 返回列表⾥指定范围内的元素
+    start、stop为元素的下标索引
+    索引从左侧开始，第⼀个元素为0
+    索引可以是负数，表示从尾部开始计数，如-1表示最后⼀个元素
+    lrange key start stop
+
+    获取键为'a1'的列表所有元素
+    127.0.0.1:6379> lrange a1 0 -1
+    1) "c"
+    2) "3"
+    3) "b"
+    4) "a"
+    5) "0"
+    6) "1"
+    7) "2"
+    
+- 设置指定索引位置的元素值
+    索引从左侧开始，第⼀个元素为0
+    索引可以是负数，表示尾部开始计数，如-1表示最后⼀个元素
+    
+    修改键为'a1'的列表中下标为1的元素值为'z',下标为1的值本来是“3”
+    127.0.0.1:6379> lset a1 1 z
+    OK
+    127.0.0.1:6379> lrange a1 0 -1
+    1) "c"
+    2) "z"
+    3) "b"
+    4) "a"
+    5) "0"
+    6) "1"
+    7) "2"
+    
+- 删除指定元素
+    将列表中前count次出现的值为value的元素移除
+    count > 0: 从头往尾移除
+    count < 0: 从尾往头移除
+    count = 0: 移除所有
+
+    lrem key count value
+
+    向列表'a2'中加⼊元素'a'、'b'、'a'、'b'、'a'、'b'
+    从'a2'列表右侧开始删除2个'b'，然后再次查看a2的所有元素
+    127.0.0.1:6379> lpush a2 a b a b a b
+    (integer) 6
+    127.0.0.1:6379> lrange a2 0 -1
+    1) "b"
+    2) "a"
+    3) "b"
+    4) "a"
+    5) "b"
+    6) "a"
+    127.0.0.1:6379> lrem a2 -2 b
+    (integer) 2
+    127.0.0.1:6379> lrange a2 0 -1
+    1) "b"
+    2) "a"
+    3) "a"
+    4) "a"
+    
+- 删除列表第一个元素
+    lpos listname
+    
+    127.0.0.1:6379> lpop a2
+    "b"
+    127.0.0.1:6379> lrange a2 0 -1
+    1) "a"
+    2) "a"
+    3) "a"
+
+- 更多list命令参考：https://www.runoob.com/redis/redis-lists.html
+    
+
+# 10. set无序集合
+- set特点
+    ⽆序集合
+    元素为string类型
+    元素具有唯⼀性，不重复
+    说明：对于集合没有修改操作
+    
+- set没有重复的元素，可以用于爬虫去重
+
+- 添加获取元素
+    sadd key member1 member2 ...
+    向键'a3'的集合中添加元素'zhangsan'、'lisi'、'wangwu'
+    返回所有的元素
+    smembers key
+    
+    127.0.0.1:6379> sadd a3 zhangsan sili wangwu
+    (integer) 3
+    127.0.0.1:6379> smembers a3
+    1) "wangwu"
+    2) "zhangsan"
+    3) "sili"
+    
+- 删除指定元素
+    srem key member
+    删除键'a3'的集合中元素'wangwu'
+    
+    127.0.0.1:6379> srem a3 wangwu
+    (integer) 1
+    127.0.0.1:6379> smembers a3
+    1) "zhangsan"
+    2) "sili"
+
+- 更多set命令参考：https://www.runoob.com/redis/redis-sets.html
+    
+# 11. zset有序集合
+- zset特点
+    sorted set，有序集合
+    元素为string类型
+    元素具有唯⼀性，不重复
+    每个元素都会关联⼀个double类型的score，表示权重，通过权重将元素从⼩到⼤排序
+    说明：没有修改操作
+
+- 添加元素
+    zadd key score1 member1 score2 member2 ...
+    向键'a4'的集合中添加元素'lisi'、'wangwu'、'zhaoliu'、'zhangsan'，权重分别为4、5、6、3
+    127.0.0.1:6379> zadd a4 4 lisi 5 wangwu 6 zhaoliu 3 zhangsan
+    (integer) 4
+    
+- 获取
+    返回指定范围内的元素
+    start、stop为元素的下标索引
+    索引从左侧开始，第⼀个元素为0
+    索引可以是负数，表示从尾部开始计数，如-1表示最后⼀个元素
+    zrange key start stop
+    
+    返回score值在min和max之间的成员
+    zrangebyscore key min max
+
+    返回成员member的score值
+    
+    127.0.0.1:6379> zrange a4 0 -1
+    1) "zhangsan"
+    2) "lisi"
+    3) "wangwu"
+    4) "zhaoliu"
+    127.0.0.1:6379> zrangebyscore a4 4 6
+    1) "lisi"
+    2) "wangwu"
+    3) "zhaoliu"
+    127.0.0.1:6379> zscore a4 zhaoliu
+    "6"
+
+- 删除指定元素
+    zrem key member1 member2 ...
+    删除权重在指定范围的元素
+    zremrangebyscore key min max
+
+    删除集合'a4'中元素'zhangsan'
+    删除集合'a4'中权限在5、6之间的元素
+    
+    127.0.0.1:6379> zrem a4 zhangsan
+    (integer) 1
+    127.0.0.1:6379> zremrangebyscore a4 5 6
+    (integer) 2
+    127.0.0.1:6379> zrange a4 0 -1
+    1) "lisi"
+
+- 更多zset命令参考：https://www.runoob.com/redis/redis-sorted-sets.html
