@@ -20,23 +20,31 @@ MongoDB教程：
 # 1. MongoDB安装
 - MongoDB安装的安装查看博文：[MongoDB v4.0.7的安装、启动和停止](https://blog.csdn.net/u011318077/article/details/88849634)
 - 注意：
-    - 软件安装完成后，先要添加安装目录的bin文件夹到系统变量的环境变量path路径中(bin目录下有mongo.exe、mongod.exe等应用程序)
+    - 软件安装完成后，先要添加安装目录的bin文件夹到系统变量的环境变量path路径中
+    - (bin目录下有mongo.exe、mongod.exe等应用程序)
     - MongoDB安装之后，需要手动创建数据库文件夹(用于存储数据)，一个文件夹是一个独立的数据库
     - MongoDB服务启动方式常用两种：
+    方式1：
         建议打开两个CMD窗口，一个窗口启动服务，一个窗口操作数据
         打开第一个窗口：
-        命令行启动：mongod --dbpath H:\mongodb\data\db (H:\mongodb\data\db为创建的数据库路径)
-        注册为系统服务后启动：net start mongodb
-        打开第二个窗口执行：mongo(连接到数据库)
-        
+        命令行启动：mongod --dbpath H:\mongodb\data\db 
+        (H:\mongodb\data\db为创建的数据库路径，启动时候可以指定端口号，数据库位置等参数，参考副本集创建)
+        默认启动的接口是：127.0.0.1:27017
+    方式2：
+        参考博文中内容：
+        注册为系统服务后启动，管理员运行CMD窗口后，执行：net start mongodb
+        打开第二个窗口执行：mongo(连接到数据库，默认连接27017端口)
+         
     - 上面注册只是将H盘下的mongodb数据库（一个存储数据的文件夹）创建为系统服务
     - 如果有又创建了另外一个mongodb1数据库，需要重新注册到系统服务 启动执行net start mongodb1
 
-- MongoDB启动命令和注册为系统服务及：
+- MongoDB启动命令和注册为系统服务：
     Python爬虫开发与项目实战8.3.1节内容
     
 # 2. MongoDB副本集
 - 查看Python爬虫开发与项目实战笔记及截图
+- 参考博文：MongoDB集群(副本集)新手入门图文教程（版本号：V4.0.7）
+- https://blog.csdn.net/u011318077/article/details/88936999
 
 # 3. MongoDB基本概念
 - 文档document
@@ -95,14 +103,15 @@ MongoDB 应用案例
 
 # 3. 集合文档
 
-- show collections 显示当前数据库下的集合
+- show collections 显示当前数据库下的集合（或者使用show tables,新版本增加了改命令）
+- 注意：show tables 本来是mysql关系型数据可显示的是在当前数据库（mongodb中的databases）下有哪些数据表（数据表就相当于mongodb中的集合）
 
 - 插入insert：
     db.集合名称.insert(document)
     
     - use test 创建test数据库
     - 向当前数据库创建test1000集合并插入文档
-    - 插入的文档都是键值格式，实际是json格式(键可以不用双引号)
+    - 插入的文档都是键值格式(类似字典)，实际是json格式(键可以不用双引号)
     - db.test1000.insert({name:"xiaowang",age:10})
     
     db.test1000.insert({_id:"20170101",name:'gj',age:1})
@@ -127,7 +136,7 @@ MongoDB 应用案例
     
     db.test1000.update({name:"hr"},{name:"mnc"})   替换一条数据
     db.test1000.update({name:"hr"},{$set:{name:"hys"}})    更新一条数据
-    db.test1000.update({},{$set:{gender:0}},{multi:true})   更新全部数据
+    db.test1000.update({},{$set:{gender:0}},{multi:true})   条件为空，更新全部数据
     注意：更新多条要使用$操作符
     
 - 删除remove
@@ -154,7 +163,7 @@ MongoDB 应用案例
     yunqi         0.000GB
     > use test
     switched to db test
-    > show collections
+    > show collections 或者show tables
     dv3
     stu
     test1000
