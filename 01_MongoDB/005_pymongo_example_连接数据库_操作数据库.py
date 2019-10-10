@@ -6,6 +6,10 @@ import pymongo
 # 注意，脚本不能命名为pymongo.py，不然会报错找不到MongoClient属性
 # 连接本地的MongoDB服务器默认端口127.0.0.1:27017
 client = pymongo.MongoClient()
+# 可以指定端口
+# client = pymongo.MongoClient(host='localhost', port=27017)
+# client = pymongo.MongoClient(host='127.0.0.1', port=27017)
+
 
 # 第二步：获取数据库和集合
 # 获取数据库,没有就直接创建
@@ -19,7 +23,7 @@ collection = db.books
 
 # 第三步：操作数据库
 # 插入文档
-# 注意，脚本没运行一次，就像数据库中插入一次文档，所以，下面查询文档，结果会越来越多
+# 注意，代码每运行一次，就像数据库中插入一次文档，所以，下面查询文档，结果会越来越多
 book = {"author": "Mike",
         "text": "My first book!",
         "tags": ["爬虫", "python", "网络"]

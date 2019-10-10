@@ -103,15 +103,24 @@ MongoDB 应用案例
 
 # 3. 集合文档
 
-- show collections 显示当前数据库下的集合（或者使用show tables,新版本增加了改命令）
-- 注意：show tables 本来是mysql关系型数据可显示的是在当前数据库（mongodb中的databases）下有哪些数据表（数据表就相当于mongodb中的集合）
+- show collections 显示当前数据库下的集合（或者使用show tables,新版本增加了该命令）
+- 注意：show tables 本来是mysql关系型数据可显示的是在当前数据库（mongodb中的databases）
+        下有哪些数据表tables（数据表就相当于mongodb中的集合collections）
+- 文档documents就是MongoDB的最基本单元，每次插入的一个json字典就是一个文档
+    - 集合里面可以存着多个文档，文档的键值对个数可以不一样
+    - 但是为了方便管理，查找，同一个集合中的文档最好格式保持一致
+    - 比如stu(学生)集合中，可以传入文档没有age和gender
+        db.stu.insert({name:"段王爷", hometown:"大理", age:45, gender:true})
+        db.stu.insert({name:"洪七公", hometown:"华山", age:18, gender:true})
+        db.stu.insert({name:"洪", hometown:"泰山"})
 
-- 插入insert：
+
+- 插入insert：(插入时候会自动创建集合)
     db.集合名称.insert(document)
     
     - use test 创建test数据库
-    - 向当前数据库创建test1000集合并插入文档
-    - 插入的文档都是键值格式(类似字典)，实际是json格式(键可以不用双引号)
+    - 向当前数据库test创建test1000集合并插入文档
+    - 插入的文档都是键值对格式(类似字典)，实际是json格式(键可以不用双引号)
     - db.test1000.insert({name:"xiaowang",age:10})
     
     db.test1000.insert({_id:"20170101",name:'gj',age:1})
@@ -119,7 +128,7 @@ MongoDB 应用案例
     db.test1000.find() 查看该集合下的所有文档，可以显示出_id
     注意：如果插入文档时，指定_id参数，数据中本来有该id，则会出现错误，可以使用save或者update
 
-- 保存save
+- 保存save（指定id）
     db.集合名称.save(document)
     如果⽂档的_id已经存在则修改， 如果⽂档的_id不存在则添加
     
@@ -135,9 +144,9 @@ MongoDB 应用案例
     参数multi:可选，默认是false，表示只更新找到的第⼀条记录， 值为true表示把满⾜条件的⽂档全部更新
     
     db.test1000.update({name:"hr"},{name:"mnc"})   替换一条数据
-    db.test1000.update({name:"hr"},{$set:{name:"hys"}})    更新一条数据
+    db.test1000.update({name:"hr"},{$set:{name:"hys"}})    更新一条数据,hr更新为hys,multi默认是false
     db.test1000.update({},{$set:{gender:0}},{multi:true})   条件为空，更新全部数据
-    注意：更新多条要使用$操作符
+    注意：就代表是更新操作符，更新多条要multi:true参数
     
 - 删除remove
     db.集合名称.remove(<query>,{justOne: <boolean>})
@@ -147,7 +156,7 @@ MongoDB 应用案例
     将name叫xiaohong的删除
     db.test1000.remove({name:"小红"},{justOne:false})
 
-- 删除集合，条件为空，删除全部
+- 删除集合，条件为空，删除集合全部数据
     db.stu.remove({},{justOne:false})
     
 # 4. 数据查询
@@ -288,6 +297,7 @@ db.stu.insert({name:"黄药师", hometown:"桃花岛", age:40, gender:true})
 db.stu.insert({name:"段誉", hometown:"大理", age:16, gender:true})
 db.stu.insert({name:"段王爷", hometown:"大理", age:45, gender:true})
 db.stu.insert({name:"洪七公", hometown:"华山", age:18, gender:true})
+db.stu.insert({name:"洪", hometown:"泰山"})
 
 注意：
 MongoDB语句可以现在pycharm中编写，然后复制到CMD窗口中
@@ -508,7 +518,7 @@ db.dv3.aggregate(
     ]
     上面结果中有两个字典，key就是创建索引的字段
     数据库默认都会以_id字段创建默认索引，默认也是升序
-    "name" : 1 就是我们刚刚给name字段创建的索引，创建索引后查询速度明显变快
+    "name" : 1 就是我们刚刚给name字段额外创建的索引，创建索引后使用name字段查询，查询速度明显变快，
 
 - 删除索引：
      db.t12.dropIndex('索引名称')

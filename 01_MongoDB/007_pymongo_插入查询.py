@@ -5,7 +5,7 @@ from pymongo import MongoClient
 
 # 第一步：创建连接
 client = MongoClient()
-# 使用方括号选择数据库及其集合
+# 使用方括号选择数据库下的集合
 collection = client["test"]["t251"]
 # 也可以使用.的方式
 # collection = client.test.t251
