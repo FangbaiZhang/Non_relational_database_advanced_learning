@@ -109,6 +109,7 @@ MongoDB 应用案例
 # 3. 集合文档
 
 - show collections 显示当前数据库下的集合（或者使用show tables,新版本增加了该命令）
+- db.collection_name.drop()   删除该集合，成功删除选定集合，则 drop() 方法返回 true，否则返回 false。
 - 注意：show tables 本来是mysql关系型数据可显示的是在当前数据库（mongodb中的databases）
         下有哪些数据表tables（数据表就相当于mongodb中的集合collections）
 - db.collection_name.find()  显示该集合下所有的文档
@@ -192,7 +193,7 @@ MongoDB 应用案例
 - 方法pretty()： 将结果格式化，输出结果更加美观，符合编码规范
 	db.集合名称.find({条件⽂档}).pretty()
 
-## 4.1 条件运算符
+## 4.1 条件运算符(比较运算符)
 -   等于： 默认是等于判断， 没有运算符
     ⼩于：$lt （less than）
     ⼩于等于：$lte （less than equal）
@@ -215,21 +216,21 @@ MongoDB 应用案例
     查询年龄⼤于或等于18， 并且性别为true的学⽣
     db.stu.find({age:{$gte:18},gender:true})
 
-- or:使⽤$or， 值为数组， 数组中每个元素为json
+- or:使⽤$or， 值为数组(列表里面字典)， 数组中每个元素为json
     查询年龄⼤于18， 或性别为false的学⽣
     db.stu.find({$or:[{age:{$gt:18}},{gender:false}]})
     查询年龄⼤于18或性别为男⽣， 并且姓名是郭靖
-    db.stu.find({$or:[{age:{$gte:18}},{gender:true}],name:'gj'})
+    db.stu.find({$or:[{age:{$gte:18}},{gender:true}],name:'郭靖'})
 
 - 使⽤"$in"， "$nin" 判断是否在某个范围内
 查询年龄为18、 28的学⽣
 db.stu.find({age:{$in:[18,28]}})
 
 ## 4.4 正则表达式
--   使⽤//或$regex编写正则表达式
+-   使⽤//或$regex编写正则表达式，推荐使用$regex
     查询姓⻩的学⽣
     db.stu.find({name:/^⻩/})
-    db.stu.find({name:{$regex:'^⻩'}})
+    db.stu.find({name:{$regex:"^黄"}})  注意要使用双引号，单引号查询没有结果
 
 ## 4.5 limit和skip
 - ⽅法limit()： ⽤于读取指定数量的⽂档
