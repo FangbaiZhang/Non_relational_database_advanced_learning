@@ -52,7 +52,7 @@ MongoDB教程：
 文档的键值类似字典形式，键使用双引号(可省略)，值字符串使用双引号(不能省略)，整数不用双引号
 - 文档的特性：
     1. 文档的键值对是有序的
-    2. 文档的值可以是字符串，整数，数组，以及文档等类型
+    2. 文档的值可以是字符串，整数，列表，字典，数组，以及文档等类型
     3. 文档的值区分大小写及值的类型
     4. 文档中的值不仅可以是在双引号里面的字符串，还可以是其他几种数据类型（甚至可以是整个嵌入的文档)。
     5. 文档不能有重复的键。
@@ -62,8 +62,8 @@ MongoDB教程：
     集合是一组文档，没有固定的结构
 
 - 数据库database
-    一个MongoDB中可以建立多个数据库，默认数据库是db，该数据库存储在data目录下。
-    MongoDB单个实例可以容纳多个独立的数据库，不同的数据库又放置在不同的文件中
+    一个MongoDB实例中中可以建立多个数据库，数据库都放在data文件夹下面，默认数据库是db，该数据库存储在data目录下。
+    MongoDB单个实例可以容纳多个独立的数据库，不同的数据库又放置在不同的文件中，show dbs查看当前MongoDB实例下所有的数据库。
 
 - 数据库结构：MongoDB实例---数据库database---集合collection---文档document
 
@@ -111,11 +111,12 @@ MongoDB 应用案例
 - show collections 显示当前数据库下的集合（或者使用show tables,新版本增加了该命令）
 - 注意：show tables 本来是mysql关系型数据可显示的是在当前数据库（mongodb中的databases）
         下有哪些数据表tables（数据表就相当于mongodb中的集合collections）
+- db.collection_name.find()  显示该集合下所有的文档
         
 - 文档documents就是MongoDB的最基本单元，每次插入的一个json字典就是一个文档
     - 集合里面可以存着多个文档，文档的键值对个数可以不一样
     - 但是为了方便管理，查找，同一个集合中的文档最好格式保持一致
-    - 比如stu(学生)集合中，可以传入文档没有age和gender
+    - 比如stu(学生)集合中，可以传入文档没有age和gender(不建议一个集合中文档格式不同)
         db.stu.insert({name:"段王爷", hometown:"大理", age:45, gender:true})
         db.stu.insert({name:"洪七公", hometown:"华山", age:18, gender:true})
         db.stu.insert({name:"洪", hometown:"泰山"})
