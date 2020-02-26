@@ -83,10 +83,14 @@ Redis命令：
         默认使用的默认的配置文件conf，也可以自定义修改
     第二步：启动客户端
         再打开一个CMD窗口，输入redis-cli,启动Redis客户端
-        注意：redis-cli默认启动本地客户端，也可以输入IP和port接口
+        注意：redis-cli默认启动本地客户端，
+        远程连接redis-server：输入IP和port接口，下面的是本地接口，远程连接对应修改即可
         C:\Users\HP>redis-cli -h 127.0.0.1 -p 6379
         127.0.0.1:6379>
         修改IP和port接口可以连接远程服务器
+        连接客户端后，使用ping命令测试，连接成功返回PONG：
+        127.0.0.1:6379> ping
+        PONG
     
 # 3. Redis配置
 
@@ -97,10 +101,17 @@ Redis 的配置文件位于 Redis 安装目录下，文件名为 redis.conf(Wind
 https://www.runoob.com/redis/redis-conf.html
 https://blog.csdn.net/ljphilp/article/details/52934933
 
-
 - redis 127.0.0.1:6379> CONFIG GET loglevel
 使用 * 号获取所有配置项：
 - redis 127.0.0.1:6379> CONFIG GET *
+- 数据库命令：
+    - 默认连接的就是db0数据库
+    - select 1    切换到db1数据库
+    - key *       查看所有的redis键
+    - type 键名   查看键的数据类型，每种类型的值操作方法不同，先查看类型然后进行对于操作
+    - flushdb     清空当前的db数据库
+    - flushall    清空所有的db数据库 （慎用，跑路才用）
+
 
 # 4. Redis数据类型
 - Redis支持五种数据类型：
@@ -248,6 +259,7 @@ Redis是一个字典结构的存储服务器，而实际上一个Redis实例提�
 
 # 8. hash
 - Redis hash 是一个string类型的field和value的映射表，hash特别适合用于存储对象。
+- hash就类似于字典，一个人,对应很多属性，每个属性都有值
     Redis 中每个 hash 可以存储 232 - 1 键值对（40多亿）。
     hash⽤于存储对象(key)，对象的结构为属性(field)、值(value)
     值的类型为string 
