@@ -112,6 +112,7 @@ MongoDB 应用案例
 - db.collection_name.drop()   删除该集合，成功删除选定集合，则 drop() 方法返回 true，否则返回 false。
 - 注意：show tables 本来是mysql关系型数据可显示的是在当前数据库（mongodb中的databases）
         下有哪些数据表tables（数据表就相当于mongodb中的集合collections）
+
 - db.collection_name.find()  显示该集合下所有的文档
         
 - 文档documents就是MongoDB的最基本单元，每次插入的一个json字典就是一个文档
